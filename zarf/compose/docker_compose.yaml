@@ -1,0 +1,249 @@
+services:
+  database:
+    image: postgres:alpine
+    container_name: database
+    ports: ["5432:5432"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sales
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sales"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - sales-network
+
+  init-migrate-seed:
+    build:
+      context: ../..
+      dockerfile: zarf/docker/dockerfile.sales
+    image: init-migrate-seed:local
+    container_name: init-migrate-seed
+    command: ["./admin", "migrate-seed"]
+    environment:
+      - SALES_DB_USER=postgres
+      - SALES_DB_PASSWORD=postgres
+      - SALES_DB_HOST=database
+      - SALES_DB_NAME=sales
+      - SALES_DB_DISABLE_TLS=true
+    networks:
+      - sales-network
+    depends_on:
+      database:
+        condition: service_healthy
+
+  auth:
+    build:
+      context: ../..
+      dockerfile: zarf/docker/dockerfile.auth
+    image: auth-service:local
+    container_name: auth
+    ports: ["6000:6000", "6010:6010"]
+    environment:
+      - GOMAXPROCS=2
+      - AUTH_DB_USER=postgres
+      - AUTH_DB_PASSWORD=postgres
+      - AUTH_DB_HOST=database
+      - AUTH_DB_NAME=sales
+      - AUTH_DB_DISABLE_TLS=true
+      - AUTH_WEB_TRACE_HOST=tempo:4317
+      - OTEL_SERVICE_NAME=auth
+      - OTEL_TRACES_SAMPLER=always_on
+      - ELK_HOST=logstash
+      - ELK_PORT=5000
+      - ELK_PROTOCOL=tcp
+      - LOG_LEVEL=debug
+      - LOG_OUTPUT=console,elk
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:6000/v1/liveness || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+    networks:
+      - sales-network
+    depends_on:
+      init-migrate-seed:
+        condition: service_started
+      logstash:
+        condition: service_healthy
+
+  sales:
+    build:
+      context: ../..
+      dockerfile: zarf/docker/dockerfile.sales
+    image: sales-service:local
+    container_name: sales
+    ports: ["3000:3000", "3010:3010"]
+    environment:
+      - GOMAXPROCS=2
+      - SALES_DB_USER=postgres
+      - SALES_DB_PASSWORD=postgres
+      - SALES_DB_HOST=database
+      - SALES_DB_NAME=sales
+      - SALES_DB_DISABLE_TLS=true
+      - SALES_AUTH_HOST=http://auth:6000
+      - AUTH_WEB_TRACE_HOST=tempo:4317
+      - OTEL_SERVICE_NAME=sales
+      - OTEL_TRACES_SAMPLER=always_on
+      - ELK_HOST=logstash
+      - ELK_PORT=5000
+      - ELK_PROTOCOL=tcp
+      - LOG_LEVEL=debug
+      - LOG_OUTPUT=console,elk
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/v1/liveness || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+    networks:
+      - sales-network
+    depends_on:
+      init-migrate-seed:
+        condition: service_started
+      logstash:
+        condition: service_healthy
+
+  metrics:
+    build:
+      context: ../..
+      dockerfile: zarf/docker/dockerfile.metrics
+    image: metrics-service:local
+    container_name: metrics
+    ports: ["4000:4000", "4010:4010", "4020:4020"]
+    environment:
+      - GOMAXPROCS=1
+      - METRICS_COLLECT_FROM=http://sales:3010/debug/vars,http://auth:6010/debug/vars
+    networks:
+      - sales-network
+    depends_on:
+      - sales
+
+
+  prometheus:
+    image: prom/prometheus:v3.7.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../../zarf/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - sales-network
+    depends_on:
+      - metrics
+
+  grafana:
+    image: grafana/grafana:12.2.0
+    container_name: grafana
+    ports:
+      - "9091:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_FEATURE_TOGGLES_ENABLE=traceToLogs
+      - GF_TRACING_JAEGER_DISABLED=false
+      - GF_TRACING_JAEGER_ADDRESS=tempo:6831
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    networks:
+      - sales-network
+    depends_on:
+      - prometheus # needs to add Prometheus datasource, Prometheus server URL = http://prometheus:9090
+      - tempo      # needs to add Tempo, Tempo server URL = http://tempo:3200
+
+
+
+  tempo:
+    image: grafana/tempo:2.9.0
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "9411:9411"   # Zipkin
+      - "14250:14250" # Jaegerc
+    volumes:
+      - ../../zarf/tempo/tempo.yaml:/etc/tempo/tempo.yaml
+    networks:
+      - sales-network
+
+  # Elasticsearch service
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    networks:
+      - sales-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Logstash service
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.10.4
+    container_name: logstash
+    volumes:
+      - ../../zarf/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5000:5000"
+    environment:
+      - LS_JAVA_OPTS=-Xmx256m -Xms256m
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - sales-network
+    healthcheck:
+      # This is the crucial health check that signals Logstash is ready to receive data.
+      test: ["CMD", "curl", "-f", "http://localhost:9600"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Kibana service
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.4
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - sales-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601/api/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    name: sales_postgres_data
+  grafana-storage:
+    driver: local
+
+networks:
+  sales-network:
+    driver: bridge

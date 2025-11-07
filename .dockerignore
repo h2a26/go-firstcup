@@ -1,0 +1,20 @@
+# Directories
+.circleci/
+.git/
+.reading/
+node_modules/
+**/node_modules/
+**/dist/
+**/.git/
+**/.idea/
+
+# Files
+.dockerignore
+.gitignore
+*.md
+LICENSE
+
+# Project specific
+zarf/docker/
+CONTRIBUTORS
+

@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'app-metrics'
+    scrape_interval: 5s
+    metrics_path: '/metrics'  # Explicitly set the metrics path
+    static_configs:
+      - targets: ['metrics:4020']  # Use the Prometheus metrics port
+        labels:
+          service: 'app-metrics'
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
