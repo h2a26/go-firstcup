@@ -7,6 +7,7 @@ import (
 	"expvar"
 	"fmt"
 	"github.com/joho/godotenv"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -52,16 +53,18 @@ var build = "develop"
 var routes = "all" // go build -ldflags "-X main.routes=crud"
 
 func main() {
-	_ = godotenv.Load("../../.env")
+	err := godotenv.Load()
+	if err != nil {
+		log.Printf("could not load .env file: %v. Continuing...", err)
+	}
+	log.Printf("SALES_DB_HOST: %s", os.Getenv("SALES_DB_HOST"))
 
 	var log *logger.Logger
 
 	// Determine log level (defaulting to LevelInfo)
 	logLevel := logger.LevelInfo
 	if lvl := os.Getenv("LOG_LEVEL"); lvl != "" {
-		if err := logLevel.UnmarshalText([]byte(lvl)); err != nil {
-
-		}
+		logLevel.UnmarshalText([]byte(lvl))
 	}
 
 	// Get outputs from environment or default to console
