@@ -1,5 +1,5 @@
 # --- BUILD STAGE ---
-FROM golang:1.25-alpine AS build_metrics
+FROM golang:1.25-alpine AS build_admin
 ENV CGO_ENABLED=0
 
 ARG BUILD_REF
@@ -13,10 +13,10 @@ RUN go mod download
 COPY . .
 
 # Build the binary from its specific directory.
-WORKDIR /app/api/services/metrics
+WORKDIR /app/api/tooling/admin
 
 # 3. Binary Optimization: Use -s and -w ldflags to strip debug symbols and DWARF tables.
-RUN go build -ldflags "-s -w -X main.build=${BUILD_REF}" -o /bin/metrics
+RUN go build -ldflags "-s -w -X main.build=${BUILD_REF}" -o /bin/admin
 
 # --- RUNTIME STAGE ---
 # Use the minimal Alpine image for the final production container.
@@ -24,28 +24,28 @@ FROM alpine:3.22
 ARG BUILD_DATE
 ARG BUILD_REF
 
-# 4. Security: Create a dedicated non-root user and group ('metrics') with ID 1000.
-RUN addgroup -g 1000 -S metrics && \
-    adduser -u 1000 -h /app -G metrics -S metrics
+# 4. Security: Create a dedicated non-root user and group ('admin') with ID 1000.
+RUN addgroup -g 1000 -S admin && \
+    adduser -u 1000 -h /app -G admin -S admin
 
 WORKDIR /app
 
 # 5. Copy Binary: Copy ONLY the compiled, stripped binary from the build stage.
-COPY --from=build_metrics --chown=metrics:metrics /bin/metrics /app/metrics
+COPY --from=build_admin --chown=admin:admin /bin/admin /app/admin
 
-# Ensure the binary is executable
-RUN chmod +x /app/metrics
+# Ensure both binaries are executable
+RUN chmod +x /app/admin
 
-# 6. Switch User: Run the container and the application as the non-root user.
-USER metrics
+# 7. Switch User: Run the container and the application as the non-root user.
+USER admin
 
-# 7. Entrypoint: Use the exec form (preferred) to execute the binary.
-CMD ["/app/metrics"]
+# 8. Entrypoint: The primary service binary to run on container startup.
+CMD ["/app/admin"]
 
 # OCI Labels (Best practice for image metadata)
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \
-      org.opencontainers.image.title="metrics" \
+      org.opencontainers.image.title="admin" \
       org.opencontainers.image.authors="hein<heindaemon@gmail.com>" \
-      org.opencontainers.image.source="https://github.com/h2a26/go-firstcup/tree/master/a/services/metrics" \
+      org.opencontainers.image.source="https://github.com/h2a26/go-firstcup/tree/master/a/services/admin" \
       org.opencontainers.image.revision="${BUILD_REF}" \
       org.opencontainers.image.vendor="summer scent"

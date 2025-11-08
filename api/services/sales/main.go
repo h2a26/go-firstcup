@@ -6,6 +6,7 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
+	"github.com/joho/godotenv"
 	"net/http"
 	"os"
 	"os/signal"
@@ -51,6 +52,8 @@ var build = "develop"
 var routes = "all" // go build -ldflags "-X main.routes=crud"
 
 func main() {
+	_ = godotenv.Load("../../.env")
+
 	var log *logger.Logger
 
 	// Determine log level (defaulting to LevelInfo)

@@ -18,6 +18,7 @@ import (
 	"github.com/h2a26/go-firstcup/foundation/keystore"
 	"github.com/h2a26/go-firstcup/foundation/logger"
 	"github.com/h2a26/go-firstcup/foundation/otel"
+	"github.com/joho/godotenv"
 	"net/http"
 	"os"
 	"os/signal"
@@ -30,6 +31,8 @@ import (
 var build = "develop"
 
 func main() {
+	_ = godotenv.Load("../../.env")
+
 	var log *logger.Logger
 
 	// Determine log level (defaulting to LevelInfo)

@@ -10,6 +10,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/jmoiron/sqlx v1.4.0
+	github.com/joho/godotenv v1.5.1
 	github.com/markbates/goth v1.82.0
 	github.com/open-policy-agent/opa v1.9.0
 	github.com/viccon/sturdyc v1.1.5

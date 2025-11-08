@@ -31,6 +31,6 @@ $ go mod vendor
 
 
 ```
-$ docker-compose -f zarf/compose/docker_compose.yaml up -d --build
+$ docker-compose --env-file .env -f zarf/compose/docker_compose.yaml up -d --build
 $ docker-compose -f zarf/compose/docker_compose.yaml down -v
 ```

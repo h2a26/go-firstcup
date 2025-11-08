@@ -3,14 +3,15 @@ services:
     image: postgres:alpine
     container_name: database
     ports: ["5432:5432"]
+    env_file: ../../.env
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: sales
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d sales"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -18,19 +19,20 @@ services:
     networks:
       - sales-network
 
-  init-migrate-seed:
+  admin:
     build:
       context: ../..
-      dockerfile: zarf/docker/dockerfile.sales
-    image: init-migrate-seed:local
-    container_name: init-migrate-seed
+      dockerfile: zarf/docker/dockerfile.admin
+    image: admin-service:local
+    container_name: admin
     command: ["./admin", "migrate-seed"]
+    env_file: ../../.env
     environment:
-      - SALES_DB_USER=postgres
-      - SALES_DB_PASSWORD=postgres
-      - SALES_DB_HOST=database
-      - SALES_DB_NAME=sales
-      - SALES_DB_DISABLE_TLS=true
+      - SALES_DB_USER=${SALES_DB_USER}
+      - SALES_DB_PASSWORD=${SALES_DB_PASSWORD}
+      - SALES_DB_HOST=${SALES_DB_HOST}
+      - SALES_DB_NAME=${SALES_DB_NAME}
+      - SALES_DB_DISABLE_TLS=${SALES_DB_DISABLE_TLS}
     networks:
       - sales-network
     depends_on:
@@ -44,21 +46,22 @@ services:
     image: auth-service:local
     container_name: auth
     ports: ["6000:6000", "6010:6010"]
+    env_file: ../../.env
     environment:
-      - GOMAXPROCS=2
-      - AUTH_DB_USER=postgres
-      - AUTH_DB_PASSWORD=postgres
-      - AUTH_DB_HOST=database
-      - AUTH_DB_NAME=sales
-      - AUTH_DB_DISABLE_TLS=true
-      - AUTH_WEB_TRACE_HOST=tempo:4317
-      - OTEL_SERVICE_NAME=auth
-      - OTEL_TRACES_SAMPLER=always_on
-      - ELK_HOST=logstash
-      - ELK_PORT=5000
-      - ELK_PROTOCOL=tcp
-      - LOG_LEVEL=debug
-      - LOG_OUTPUT=console,elk
+      - GOMAXPROCS=${GOMAXPROCS}
+      - AUTH_DB_USER=${AUTH_DB_USER}
+      - AUTH_DB_PASSWORD=${AUTH_DB_PASSWORD}
+      - AUTH_DB_HOST=${AUTH_DB_HOST}
+      - AUTH_DB_NAME=${AUTH_DB_NAME}
+      - AUTH_DB_DISABLE_TLS=${AUTH_DB_DISABLE_TLS}
+      - AUTH_WEB_TRACE_HOST=${AUTH_WEB_TRACE_HOST}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME}
+      - OTEL_TRACES_SAMPLER=${OTEL_TRACES_SAMPLER}
+      - ELK_HOST=${ELK_HOST}
+      - ELK_PORT=${ELK_PORT}
+      - ELK_PROTOCOL=${ELK_PROTOCOL}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_OUTPUT=${LOG_OUTPUT}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:6000/v1/liveness || exit 1"]
       interval: 5s
@@ -67,7 +70,7 @@ services:
     networks:
       - sales-network
     depends_on:
-      init-migrate-seed:
+      admin:
         condition: service_started
       logstash:
         condition: service_healthy
@@ -79,22 +82,23 @@ services:
     image: sales-service:local
     container_name: sales
     ports: ["3000:3000", "3010:3010"]
+    env_file: ../../.env
     environment:
-      - GOMAXPROCS=2
-      - SALES_DB_USER=postgres
-      - SALES_DB_PASSWORD=postgres
-      - SALES_DB_HOST=database
-      - SALES_DB_NAME=sales
-      - SALES_DB_DISABLE_TLS=true
-      - SALES_AUTH_HOST=http://auth:6000
-      - AUTH_WEB_TRACE_HOST=tempo:4317
+      - GOMAXPROCS=${GOMAXPROCS}
+      - SALES_DB_USER=${SALES_DB_USER}
+      - SALES_DB_PASSWORD=${SALES_DB_PASSWORD}
+      - SALES_DB_HOST=${SALES_DB_HOST}
+      - SALES_DB_NAME=${SALES_DB_NAME}
+      - SALES_DB_DISABLE_TLS=${SALES_DB_DISABLE_TLS}
+      - SALES_AUTH_HOST=${SALES_AUTH_HOST}
+      - AUTH_WEB_TRACE_HOST=${AUTH_WEB_TRACE_HOST}
       - OTEL_SERVICE_NAME=sales
-      - OTEL_TRACES_SAMPLER=always_on
-      - ELK_HOST=logstash
-      - ELK_PORT=5000
-      - ELK_PROTOCOL=tcp
-      - LOG_LEVEL=debug
-      - LOG_OUTPUT=console,elk
+      - OTEL_TRACES_SAMPLER=${OTEL_TRACES_SAMPLER}
+      - ELK_HOST=${ELK_HOST}
+      - ELK_PORT=${ELK_PORT}
+      - ELK_PROTOCOL=${ELK_PROTOCOL}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_OUTPUT=${LOG_OUTPUT}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000/v1/liveness || exit 1"]
       interval: 5s
@@ -103,7 +107,7 @@ services:
     networks:
       - sales-network
     depends_on:
-      init-migrate-seed:
+      admin:
         condition: service_started
       logstash:
         condition: service_healthy
@@ -115,14 +119,14 @@ services:
     image: metrics-service:local
     container_name: metrics
     ports: ["4000:4000", "4010:4010", "4020:4020"]
+    env_file: ../../.env
     environment:
       - GOMAXPROCS=1
-      - METRICS_COLLECT_FROM=http://sales:3010/debug/vars,http://auth:6010/debug/vars
+      - METRICS_COLLECT_FROM=${METRICS_COLLECT_FROM}
     networks:
       - sales-network
     depends_on:
       - sales
-
 
   prometheus:
     image: prom/prometheus:v3.7.0
@@ -146,21 +150,20 @@ services:
     container_name: grafana
     ports:
       - "9091:3000"
+    env_file: ../../.env
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_FEATURE_TOGGLES_ENABLE=traceToLogs
-      - GF_TRACING_JAEGER_DISABLED=false
-      - GF_TRACING_JAEGER_ADDRESS=tempo:6831
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=${GF_USERS_ALLOW_SIGN_UP}
+      - GF_FEATURE_TOGGLES_ENABLE=${GF_FEATURE_TOGGLES_ENABLE}
+      - GF_TRACING_JAEGER_DISABLED=${GF_TRACING_JAEGER_DISABLED}
+      - GF_TRACING_JAEGER_ADDRESS=${GF_TRACING_JAEGER_ADDRESS}
     volumes:
       - grafana-storage:/var/lib/grafana
     networks:
       - sales-network
     depends_on:
-      - prometheus # needs to add Prometheus datasource, Prometheus server URL = http://prometheus:9090
-      - tempo      # needs to add Tempo, Tempo server URL = http://tempo:3200
-
-
+      - prometheus  # needs to add Prometheus datasource, Prometheus server URL = http://prometheus:9090
+      - tempo       # needs to add Tempo, Tempo server URL = http://tempo:3200
 
   tempo:
     image: grafana/tempo:2.9.0
@@ -176,7 +179,6 @@ services:
     networks:
       - sales-network
 
-  # Elasticsearch service
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4
     container_name: elasticsearch
@@ -198,7 +200,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Logstash service
   logstash:
     image: docker.elastic.co/logstash/logstash:8.10.4
     container_name: logstash
@@ -207,20 +208,17 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - LS_JAVA_OPTS=-Xmx256m -Xms256m
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
+      - "xpack.monitoring.enabled=false"
     networks:
       - sales-network
+    depends_on:
+      - elasticsearch
     healthcheck:
-      # This is the crucial health check that signals Logstash is ready to receive data.
       test: ["CMD", "curl", "-f", "http://localhost:9600"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Kibana service
   kibana:
     image: docker.elastic.co/kibana/kibana:8.10.4
     container_name: kibana
@@ -233,7 +231,7 @@ services:
     networks:
       - sales-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5601/api/status"]
+      test: [ "CMD", "curl", "-f", "http://localhost:5601/api/status" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -247,3 +245,4 @@ volumes:
 networks:
   sales-network:
     driver: bridge
+    name: sales_network

@@ -1,32 +1,54 @@
-# Build the Go Binary.
-FROM golang:1.25 AS build_auth
+# --- BUILD STAGE ---
+FROM golang:1.25-alpine AS build_auth
 ENV CGO_ENABLED=0
+
 ARG BUILD_REF
+WORKDIR /app
 
-# Copy the source code into the container.
-COPY . /service
+# 1. Dependency Caching: Copy only go.mod and go.sum first.
+COPY go.mod go.sum ./
+RUN go mod download
 
-# Build the service binary. We are doing this last since this will be different
-# every time we run through this process.
-WORKDIR /service/api/services/auth
-RUN go build -ldflags "-X main.build=${BUILD_REF}"
+# 2. Source Code Copy: Copy the rest of the source code.
+COPY . .
 
+# Build the binary from its specific directory.
+WORKDIR /app/api/services/auth
 
-# Run the Go Binary in Alpine.
+# 3. Binary Optimization: Use -s and -w ldflags to strip debug symbols and DWARF tables.
+RUN go build -ldflags "-s -w -X main.build=${BUILD_REF}" -o /bin/auth
+
+# --- RUNTIME STAGE ---
+# Use the minimal Alpine image for the final production container.
 FROM alpine:3.22
 ARG BUILD_DATE
 ARG BUILD_REF
-RUN addgroup -g 1000 -S auth && \
-    adduser -u 1000 -h /service -G auth -S auth
-COPY --from=build_auth --chown=auth:auth /service/zarf/keys/. /service/zarf/keys/.
-COPY --from=build_auth --chown=auth:auth /service/api/services/auth/auth /service/auth
-WORKDIR /service
-USER auth
-CMD ["./auth"]
 
+# 4. Security: Create a non-root user and group ('auth') with ID 1000.
+RUN addgroup -g 1000 -S auth && \
+    adduser -u 1000 -h /app -G auth -S auth
+
+WORKDIR /app
+
+# 5. Copy Assets: Copy necessary external assets (keys/config) from the build stage.
+COPY --from=build_auth --chown=auth:auth /app/zarf/keys/. /app/zarf/keys/.
+
+# 6. Copy Binary: Copy ONLY the compiled, stripped binary from the build stage.
+COPY --from=build_auth --chown=auth:auth /bin/auth /app/auth
+
+# Ensure the binary is executable
+RUN chmod +x /app/auth
+
+# 7. Switch User: Run all subsequent commands and the final application as the non-root user.
+USER auth
+
+# 8. Entrypoint: Use the exec form (preferred) to execute the binary.
+CMD ["/app/auth"]
+
+# OCI Labels (Best practice for image metadata)
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.title="auth" \
-      org.opencontainers.image.authors="William Kennedy <bill@ardanlabs.com>" \
-      org.opencontainers.image.source="https://github.com/ardanlabs/service/tree/master/a/services/auth" \
+      org.opencontainers.image.authors="hein<heindaemon@gmail.com>" \
+      org.opencontainers.image.source="https://github.com/h2a26/go-firstcup/tree/master/a/services/auth" \
       org.opencontainers.image.revision="${BUILD_REF}" \
-      org.opencontainers.image.vendor="Ardan Labs"
+      org.opencontainers.image.vendor="summer scent"
