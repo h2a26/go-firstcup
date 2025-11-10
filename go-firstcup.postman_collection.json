@@ -1,0 +1,899 @@
+{
+	"info": {
+		"_postman_id": "40d09684-ace6-4cb8-b1fa-844524e8b6ee",
+		"name": "go-firstcup",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49316643",
+		"_collection_link": "https://heinhtetaung-16f82225-2064562.postman.co/workspace/M-Pay's-Workspace~c5d1a0e7-d8ff-476b-895a-714ff77fecd8/collection/49316643-40d09684-ace6-4cb8-b1fa-844524e8b6ee?action=share&source=collection_link&creator=49316643"
+	},
+	"item": [
+		{
+			"name": "authapp",
+			"item": [
+				{
+					"name": "auth/token/{kid} for admin",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "gophers",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "admin@example.com",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:6000/v1/auth/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "6000",
+							"path": [
+								"v1",
+								"auth",
+								"token",
+								"54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "auth/token/{kid} for user",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "user@example.com",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "gophers",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:6000/v1/auth/token/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "6000",
+							"path": [
+								"v1",
+								"auth",
+								"token",
+								"54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "auth/authenticate",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:6000/v1/auth/authenticate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "6000",
+							"path": [
+								"v1",
+								"auth",
+								"authenticate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "auth/authorize",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"UserID\": \"5cf37266-3473-4006-984f-9325122678b7\",\n    \"Claims\": {\n        \"iss\": \"service project\",\n        \"sub\": \"5cf37266-3473-4006-984f-9325122678b7\",\n        \"exp\": 1794148147,\n        \"iat\": 1762612147,\n        \"roles\": [\n            \"ADMIN\"\n        ]\n    },\n    \"Rule\": \"rule_any\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:6000/v1/auth/authorize",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "6000",
+							"path": [
+								"v1",
+								"auth",
+								"authorize"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "checkapp",
+			"item": [
+				{
+					"name": "readiness",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:6000/v1/readiness",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "6000",
+							"path": [
+								"v1",
+								"readiness"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "liveness",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:6000/v1/liveness",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "6000",
+							"path": [
+								"v1",
+								"liveness"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "userapp",
+			"item": [
+				{
+					"name": "users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/v1/users?page=1&rows=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "rows",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "users/{user_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/v1/users/c5bf8035-2d71-407b-ac84-4e3540291bb8",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"users",
+								"c5bf8035-2d71-407b-ac84-4e3540291bb8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "users",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Alex Smith\",\n    \"email\": \"alex.smith@example.com\",\n    \"roles\": [\n        \"USER\"\n    ],\n    \"department\": \"\",\n    \"password\": \"pass123\",\n    \"passwordConfirm\": \"pass123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/v1/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "users/role/{user_id}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roles\": [\"ADMIN\"]\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/v1/users/role/c5bf8035-2d71-407b-ac84-4e3540291bb8",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"users",
+								"role",
+								"c5bf8035-2d71-407b-ac84-4e3540291bb8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "users/{user_id}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Alex Smith\",\n    \"email\": \"alex.smith@example.com\",\n    \"roles\": [\"USER\"],\n    \"department\": \"summer\",\n    \"password\": \"SecurePassword123!\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/v1/users/c5bf8035-2d71-407b-ac84-4e3540291bb8",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"users",
+								"c5bf8035-2d71-407b-ac84-4e3540291bb8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "users/{user_id}",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/v1/users/c5bf8035-2d71-407b-ac84-4e3540291bb8",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"users",
+								"c5bf8035-2d71-407b-ac84-4e3540291bb8"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "homeapp",
+			"item": [
+				{
+					"name": "homes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"SINGLE FAMILY\",\n    \"address\": {\n        \"address1\": \"Downing Street\",\n        \"address2\": \"Baker Street\",\n        \"zipCode\": \"SW1A 2AA\",\n        \"city\": \"London\",\n        \"state\": \"LA\",\n        \"country\": \"UK\"\n    }\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/v1/homes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"homes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "homes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/v1/homes?page=1&rows=20",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"homes"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "rows",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "homes/{home_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/v1/homes/915957e9-79e0-44cc-b29c-743a32c0d41c",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"homes",
+								"915957e9-79e0-44cc-b29c-743a32c0d41c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "homes/{home_id}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"SINGLE FAMILY\",\n    \"address\": {\n        \"address1\": \"Downing Street\",\n        \"address2\": \"Baker Street\",\n        \"zipCode\": \"SW1A 2AA\",\n        \"city\": \"London\",\n        \"state\": \"LA\",\n        \"country\": \"UK\"\n    }\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/v1/homes/915957e9-79e0-44cc-b29c-743a32c0d41c",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"homes",
+								"915957e9-79e0-44cc-b29c-743a32c0d41c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/v1/homes/915957e9-79e0-44cc-b29c-743a32c0d41c",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"homes",
+								"915957e9-79e0-44cc-b29c-743a32c0d41c"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "productapp",
+			"item": [
+				{
+					"name": "products",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Japanese Furniture\",\n    \"cost\": 29.99,\n    \"quantity\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/v1/products",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/v1/products?page=1&rows=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "rows",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "products/{product_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/v1/products/60472fd2-6b98-42d2-acaa-81eeb7900702",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"products",
+								"60472fd2-6b98-42d2-acaa-81eeb7900702"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "products/{product_id}",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Furniture\",\n    \"cost\": 59.99,\n    \"quantity\": 75\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/v1/products/60472fd2-6b98-42d2-acaa-81eeb7900702",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"products",
+								"60472fd2-6b98-42d2-acaa-81eeb7900702"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "products/{product_id}",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/v1/products/60472fd2-6b98-42d2-acaa-81eeb7900702",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"products",
+								"60472fd2-6b98-42d2-acaa-81eeb7900702"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "tranapp",
+			"item": [
+				{
+					"name": "tranexample",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product\": {\n        \"name\": \"Premium Widget\",\n        \"cost\": 99.99,\n        \"quantity\": 10\n    },\n    \"user\": {\n        \"name\": \"User Gopher 2\",\n        \"email\": \"user2@example.com\",\n        \"roles\": [\n            \"USER\"\n        ],\n        \"department\": \"\",\n        \"password\": \"pass123\",\n        \"passwordConfirm\": \"pass123\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/v1/tranexample",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"tranexample"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "auditapp",
+			"item": [
+				{
+					"name": "audits",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/v1/audits?page=1&rows=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"audits"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "rows",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "vproductapp",
+			"item": [
+				{
+					"name": "vproducts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/v1/vproducts?page=1&rows=10&orderBy=name&order=asc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"v1",
+								"vproducts"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "rows",
+									"value": "10"
+								},
+								{
+									"key": "orderBy",
+									"value": "name"
+								},
+								{
+									"key": "order",
+									"value": "asc"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					"if (pm.response.code === 200) {\r",
+					"let jsonData = pm.response.json();\r",
+					"\r",
+					"if (jsonData.token) {\r",
+					"    pm.collectionVariables.set(\"token\", jsonData.token);\r",
+					"    console.log(\"✅ Token saved to environment:\", jsonData.token);\r",
+					"}\r",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": ""
+		}
+	]
+}
