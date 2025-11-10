@@ -6,11 +6,11 @@ import (
 
 // These are the current set of rules we have for auth.
 const (
-	RuleAuthenticate   = "auth"
-	RuleAny            = "rule_any"
-	RuleAdminOnly      = "rule_admin_only"
-	RuleUserOnly       = "rule_user_only"
-	RuleAdminOrSubject = "rule_admin_or_subject"
+	RuleAuthenticate   = "auth"                  //Verifies the token to validate the sender's token is valid.
+	RuleAny            = "rule_any"              //Allows any authenticated user (has at least one role)
+	RuleAdminOnly      = "rule_admin_only"       //Only allows users with the "ADMIN" role
+	RuleUserOnly       = "rule_user_only"        //Only allows users with the "USER" role
+	RuleAdminOrSubject = "rule_admin_or_subject" //Allows either Users with the "ADMIN" role, OR Regular users accessing their own data (UserID matches Subject)
 )
 
 // Package name of our rego code.
