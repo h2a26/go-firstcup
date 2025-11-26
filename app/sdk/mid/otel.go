@@ -4,9 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/h2a26/go-firstcup/foundation/otel"
 	"github.com/h2a26/go-firstcup/foundation/web"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // Otel starts the otel tracing and stores the trace id in the context.

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/h2a26/go-firstcup/app/sdk/auth"
 	"github.com/h2a26/go-firstcup/app/sdk/authclient"
 	"github.com/h2a26/go-firstcup/app/sdk/errs"

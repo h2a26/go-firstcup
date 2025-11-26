@@ -3,9 +3,10 @@ package checkapp
 import (
 	"net/http"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/h2a26/go-firstcup/foundation/logger"
 	"github.com/h2a26/go-firstcup/foundation/web"
-	"github.com/jmoiron/sqlx"
 )
 
 // Config contains all the mandatory systems required by handlers.

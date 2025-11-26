@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx/types"
+
 	"github.com/h2a26/go-firstcup/business/domain/auditbus"
 	"github.com/h2a26/go-firstcup/business/types/domain"
 	"github.com/h2a26/go-firstcup/business/types/name"
-	"github.com/jmoiron/sqlx/types"
 )
 
 type audit struct {

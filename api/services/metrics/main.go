@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/h2a26/go-firstcup/foundation/otel"
-	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +13,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
+
+	"github.com/h2a26/go-firstcup/foundation/otel"
+
 	"github.com/ardanlabs/conf/v3"
+
 	"github.com/h2a26/go-firstcup/api/services/metrics/collector"
 	"github.com/h2a26/go-firstcup/api/services/metrics/publisher"
 	expvarsrv "github.com/h2a26/go-firstcup/api/services/metrics/publisher/expvar"

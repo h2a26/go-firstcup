@@ -8,14 +8,15 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/google"
+
 	"github.com/h2a26/go-firstcup/app/sdk/auth"
 	"github.com/h2a26/go-firstcup/app/sdk/errs"
 	"github.com/h2a26/go-firstcup/business/types/role"
 	"github.com/h2a26/go-firstcup/foundation/logger"
 	"github.com/h2a26/go-firstcup/foundation/web"
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/google"
 )
 
 type app struct {

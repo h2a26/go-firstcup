@@ -3,11 +3,8 @@ services:
     image: postgres:alpine
     container_name: database
     ports: ["5432:5432"]
-    env_file: ../../.env
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+    env_file:
+      - ../../.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,13 +23,8 @@ services:
     image: admin-service:local
     container_name: admin
     command: ["./admin", "migrate-seed"]
-    env_file: ../../.env
-    environment:
-      - SALES_DB_USER=${SALES_DB_USER}
-      - SALES_DB_PASSWORD=${SALES_DB_PASSWORD}
-      - SALES_DB_HOST=database
-      - SALES_DB_NAME=${SALES_DB_NAME}
-      - SALES_DB_DISABLE_TLS=${SALES_DB_DISABLE_TLS}
+    env_file:
+      - ../../.env
     networks:
       - sales-network
     depends_on:
@@ -46,22 +38,8 @@ services:
     image: auth-service:local
     container_name: auth
     ports: ["6000:6000", "6010:6010"]
-    env_file: ../../.env
-    environment:
-      - GOMAXPROCS=${GOMAXPROCS}
-      - AUTH_DB_USER=${AUTH_DB_USER}
-      - AUTH_DB_PASSWORD=${AUTH_DB_PASSWORD}
-      - AUTH_DB_HOST=${AUTH_DB_HOST}
-      - AUTH_DB_NAME=${AUTH_DB_NAME}
-      - AUTH_DB_DISABLE_TLS=${AUTH_DB_DISABLE_TLS}
-      - AUTH_WEB_TRACE_HOST=${AUTH_WEB_TRACE_HOST}
-      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME}
-      - OTEL_TRACES_SAMPLER=${OTEL_TRACES_SAMPLER}
-      - ELK_HOST=${ELK_HOST}
-      - ELK_PORT=${ELK_PORT}
-      - ELK_PROTOCOL=${ELK_PROTOCOL}
-      - LOG_LEVEL=${LOG_LEVEL}
-      - LOG_OUTPUT=${LOG_OUTPUT}
+    env_file:
+      - ../../.env
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:6000/v1/liveness || exit 1"]
       interval: 5s
@@ -82,23 +60,8 @@ services:
     image: sales-service:local
     container_name: sales
     ports: ["3000:3000", "3010:3010"]
-    env_file: ../../.env
-    environment:
-      - GOMAXPROCS=${GOMAXPROCS}
-      - SALES_DB_USER=${SALES_DB_USER}
-      - SALES_DB_PASSWORD=${SALES_DB_PASSWORD}
-      - SALES_DB_HOST=${SALES_DB_HOST}
-      - SALES_DB_NAME=${SALES_DB_NAME}
-      - SALES_DB_DISABLE_TLS=${SALES_DB_DISABLE_TLS}
-      - SALES_AUTH_HOST=http://auth:6000
-      - AUTH_WEB_TRACE_HOST=${AUTH_WEB_TRACE_HOST}
-      - OTEL_SERVICE_NAME=sales
-      - OTEL_TRACES_SAMPLER=${OTEL_TRACES_SAMPLER}
-      - ELK_HOST=${ELK_HOST}
-      - ELK_PORT=${ELK_PORT}
-      - ELK_PROTOCOL=${ELK_PROTOCOL}
-      - LOG_LEVEL=${LOG_LEVEL}
-      - LOG_OUTPUT=${LOG_OUTPUT}
+    env_file:
+      - ../../.env
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000/v1/liveness || exit 1"]
       interval: 5s
@@ -119,10 +82,8 @@ services:
     image: metrics-service:local
     container_name: metrics
     ports: ["4000:4000", "4010:4010", "4020:4020"]
-    env_file: ../../.env
-    environment:
-      - GOMAXPROCS=1
-      - METRICS_COLLECT_FROM=${METRICS_COLLECT_FROM}
+    env_file:
+      - ../../.env
     networks:
       - sales-network
     depends_on:
@@ -150,13 +111,8 @@ services:
     container_name: grafana
     ports:
       - "9091:3000"
-    env_file: ../../.env
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
-      - GF_USERS_ALLOW_SIGN_UP=${GF_USERS_ALLOW_SIGN_UP}
-      - GF_FEATURE_TOGGLES_ENABLE=${GF_FEATURE_TOGGLES_ENABLE}
-      - GF_TRACING_JAEGER_DISABLED=${GF_TRACING_JAEGER_DISABLED}
-      - GF_TRACING_JAEGER_ADDRESS=${GF_TRACING_JAEGER_ADDRESS}
+    env_file:
+      - ../../.env
     volumes:
       - grafana-storage:/var/lib/grafana
     networks:

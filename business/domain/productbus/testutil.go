@@ -6,6 +6,7 @@ import (
 	"math/rand"
 
 	"github.com/google/uuid"
+
 	"github.com/h2a26/go-firstcup/business/types/money"
 	"github.com/h2a26/go-firstcup/business/types/name"
 	"github.com/h2a26/go-firstcup/business/types/quantity"

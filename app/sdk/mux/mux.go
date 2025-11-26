@@ -6,6 +6,9 @@ import (
 	"embed"
 	"net/http"
 
+	"github.com/jmoiron/sqlx"
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/h2a26/go-firstcup/app/sdk/auth"
 	"github.com/h2a26/go-firstcup/app/sdk/authclient"
 	"github.com/h2a26/go-firstcup/app/sdk/mid"
@@ -16,8 +19,6 @@ import (
 	"github.com/h2a26/go-firstcup/business/domain/vproductbus"
 	"github.com/h2a26/go-firstcup/foundation/logger"
 	"github.com/h2a26/go-firstcup/foundation/web"
-	"github.com/jmoiron/sqlx"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // StaticSite represents a static site to run.

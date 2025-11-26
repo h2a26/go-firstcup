@@ -13,10 +13,11 @@ import (
 	"path"
 	"time"
 
+	"go.opentelemetry.io/otel/attribute"
+
 	"github.com/h2a26/go-firstcup/app/sdk/errs"
 	"github.com/h2a26/go-firstcup/foundation/logger"
 	"github.com/h2a26/go-firstcup/foundation/otel"
-	"go.opentelemetry.io/otel/attribute"
 )
 
 // This provides a default client configuration, but it's recommended

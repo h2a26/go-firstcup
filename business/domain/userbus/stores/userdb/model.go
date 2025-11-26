@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/h2a26/go-firstcup/business/domain/userbus"
 	"github.com/h2a26/go-firstcup/business/sdk/sqldb/dbarray"
 	"github.com/h2a26/go-firstcup/business/types/name"

@@ -9,6 +9,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+
 	"github.com/h2a26/go-firstcup/app/sdk/auth"
 	"github.com/h2a26/go-firstcup/business/domain/userbus"
 	"github.com/h2a26/go-firstcup/business/domain/userbus/stores/userdb"

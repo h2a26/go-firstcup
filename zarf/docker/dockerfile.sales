@@ -1,51 +1,43 @@
-# --- BUILD STAGE ---
-FROM golang:1.25-alpine AS build_sales
-ENV CGO_ENABLED=0
+# -------- Stage 1: Builder --------
+FROM golang:1.25.3-alpine AS build
+# 🏗️ Builder stage: full Go environment + tools for building
 
-ARG BUILD_REF
+# 🛠️ Install tools: UPX, objcopy, gcc, musl-dev
+RUN apk add --no-cache upx binutils gcc musl-dev
+
+# 📂 Set working directory inside builder
 WORKDIR /app
 
-# 1. Dependency Caching: Copy go.mod and go.sum first.
+# 📦 Copy Go modules and download dependencies
 COPY go.mod go.sum ./
 RUN go mod download
 
-# 2. Source Code Copy: Copy the rest of the source code.
+# 📝 Copy source code into builder
 COPY . .
 
-# Build the binary from its specific directory.
-WORKDIR /app/api/services/sales
+# 1️⃣ Build fully static Go binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-s -w" -trimpath -o /app/sales_app ./api/services/sales
+# ⚡ Output: /app/sales_app (raw Go binary)
 
-# 3. Binary Optimization: Use -s and -w ldflags to strip debug symbols and DWARF tables.
-RUN go build -ldflags "-s -w -X main.build=${BUILD_REF}" -o /bin/sales
+# 2️⃣ Strip debug symbols for smaller binary
+RUN objcopy --strip-all /app/sales_app /app/stripped_sales_app
+# 🗜️ Output: /app/stripped_sales_app (smaller, no debug info)
 
-# --- RUNTIME STAGE ---
-# Use the minimal Alpine image for the final production container.
-FROM alpine:3.22
-ARG BUILD_DATE
-ARG BUILD_REF
+# 3️⃣ Compress binary with UPX
+RUN upx --best --lzma -o /app/sales_app_compressed /app/stripped_sales_app
+# 📉 Output: /app/sales_app_compressed (final, tiny binary for production)
 
-# 4. Security: Create a dedicated non-root user and group ('sales') with ID 1000.
-RUN addgroup -g 1000 -S sales && \
-    adduser -u 1000 -h /app -G sales -S sales
+# -------- Stage 2: Final Stage (scratch) --------
+FROM scratch
+# 🧹 Final stage: empty minimal image
 
+
+# 📂 Set working directory inside runtime
 WORKDIR /app
 
-# 5. Copy Binary: Copy ONLY the compiled, stripped binary from the build stage.
-COPY --from=build_sales --chown=sales:sales /bin/sales /app/sales
+# 📂 Copy the compressed binary into final image
+COPY --from=build /app/sales_app_compressed /app/sales
 
-# Ensure both binaries are executable
-RUN chmod +x /app/sales
-
-# 7. Switch User: Run the container and the application as the non-root user.
-USER sales
-
-# 8. Entrypoint: The primary service binary to run on container startup.
-CMD ["/app/sales"]
-
-# OCI Labels (Best practice for image metadata)
-LABEL org.opencontainers.image.created="${BUILD_DATE}" \
-      org.opencontainers.image.title="sales" \
-      org.opencontainers.image.authors="hein<heindaemon@gmail.com>" \
-      org.opencontainers.image.source="https://github.com/h2a26/go-firstcup/tree/master/a/services/sales" \
-      org.opencontainers.image.revision="${BUILD_REF}" \
-      org.opencontainers.image.vendor="summer scent"
+# ▶️ Set entrypoint to run the binary
+ENTRYPOINT ["/app/sales"]

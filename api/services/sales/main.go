@@ -6,7 +6,6 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
-	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +15,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
+
 	"github.com/ardanlabs/conf/v3"
+
 	"github.com/h2a26/go-firstcup/api/services/sales/build/all"
 	"github.com/h2a26/go-firstcup/api/services/sales/build/crud"
 	"github.com/h2a26/go-firstcup/api/services/sales/build/reporting"

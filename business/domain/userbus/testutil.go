@@ -7,6 +7,7 @@ import (
 	"net/mail"
 
 	"github.com/google/uuid"
+
 	"github.com/h2a26/go-firstcup/business/types/name"
 	"github.com/h2a26/go-firstcup/business/types/password"
 	"github.com/h2a26/go-firstcup/business/types/role"

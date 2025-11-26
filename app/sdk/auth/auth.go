@@ -11,9 +11,10 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+	"github.com/open-policy-agent/opa/v1/rego"
+
 	"github.com/h2a26/go-firstcup/business/domain/userbus"
 	"github.com/h2a26/go-firstcup/foundation/logger"
-	"github.com/open-policy-agent/opa/v1/rego"
 )
 
 // Specific error variables for auth failures.

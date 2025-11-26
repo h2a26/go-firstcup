@@ -6,6 +6,7 @@ import (
 	"math/rand"
 
 	"github.com/google/uuid"
+
 	"github.com/h2a26/go-firstcup/business/types/domain"
 	"github.com/h2a26/go-firstcup/business/types/name"
 )

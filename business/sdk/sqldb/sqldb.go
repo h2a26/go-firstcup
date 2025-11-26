@@ -10,12 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/h2a26/go-firstcup/foundation/logger"
-	"github.com/h2a26/go-firstcup/foundation/otel"
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"go.opentelemetry.io/otel/attribute"
+
+	"github.com/h2a26/go-firstcup/foundation/logger"
+	"github.com/h2a26/go-firstcup/foundation/otel"
 )
 
 // lib/pq errorCodeNames
